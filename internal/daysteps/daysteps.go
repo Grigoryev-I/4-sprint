@@ -1,6 +1,7 @@
 package daysteps
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -17,24 +18,23 @@ const (
 )
 
 func parsePackage(data string) (int, time.Duration, error) {
-	str := strings.Split(data, ",")
-
-	if len(str) != 2 {
-		return 0, 0, fmt.Errorf("невалидные данные")
+	if data == "" {
+		return 0, 0, errors.New("данные отсутствуют")
 	}
 
-	steps, err := strconv.Atoi(str[0])
-	if err != nil {
-		return 0, 0, err
+	parts := strings.Split(data, ",")
+	if len(parts) != 2 {
+		return 0, 0, errors.New("невалидные данные")
 	}
 
-	if steps == 0 {
-		return 0, 0, fmt.Errorf("количество шагов должно быть больше 0")
+	steps, err := strconv.Atoi(strings.TrimSpace(parts[0]))
+	if err != nil || steps <= 0 {
+		return 0, 0, errors.New("количество шагов должно быть больше 0")
 	}
 
-	duration, err := time.ParseDuration(str[1])
-	if err != nil {
-		return 0, 0, err
+	duration, err := time.ParseDuration(strings.TrimSpace(parts[1]))
+	if err != nil || duration <= 0 {
+		return 0, 0, errors.New("продолжительность должна быть больше 0")
 	}
 
 	return steps, duration, nil
@@ -43,12 +43,8 @@ func parsePackage(data string) (int, time.Duration, error) {
 func DayActionInfo(data string, weight, height float64) string {
 	steps, duration, err := parsePackage(data)
 
-	if err != nil {
+	if err != nil || steps <= 0 {
 		fmt.Println(err)
-		return ""
-	}
-
-	if steps == 0 {
 		return ""
 	}
 
@@ -56,5 +52,5 @@ func DayActionInfo(data string, weight, height float64) string {
 	distanceKm := distanceM / mInKm
 	calories, err := spentcalories.WalkingSpentCalories(steps, weight, height, duration)
 
-	return fmt.Sprintf("Количество шагов: %d.\nДистанция составила: %.2f км.\nВы сожгли %.2f ккал.", steps, distanceKm, calories)
+	return fmt.Sprintf("Количество шагов: %d.\nДистанция составила: %.2f км.\nВы сожгли %.2f ккал.\n", steps, distanceKm, calories)
 }
