@@ -32,6 +32,14 @@ func parsePackage(data string) (int, time.Duration, error) {
 		return 0, 0, errors.New("невалидные данные")
 	}
 
+	if parts[0] != strings.TrimSpace(parts[0]) {
+		return 0, 0, errors.New("количество шагов содержит пробелы")
+	}
+
+	if parts[1] != strings.TrimSpace(parts[1]) {
+		return 0, 0, errors.New("продолжительность содержит пробелы")
+	}
+
 	steps, err := strconv.Atoi(strings.TrimSpace(parts[0]))
 	if err != nil || steps <= 0 {
 		return 0, 0, errors.New("количество шагов должно быть больше 0")
